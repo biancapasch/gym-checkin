@@ -2,29 +2,28 @@ package com.biancapasch.poc.gym_checkin.controller;
 
 import com.biancapasch.poc.gym_checkin.dto.CreateCustomerRequestDTO;
 import com.biancapasch.poc.gym_checkin.dto.CreateCustomerResponseDTO;
-import com.biancapasch.poc.gym_checkin.service.CustomerCheckinStatus;
 import com.biancapasch.poc.gym_checkin.service.CustomerService;
-import lombok.AllArgsConstructor;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/customers")
 public class CustomerController {
 
     private final CustomerService service;
 
     @PostMapping
-    public ResponseEntity<CreateCustomerResponseDTO> create(@RequestBody CreateCustomerRequestDTO request) {
+    public ResponseEntity<CreateCustomerResponseDTO> create(@Valid @RequestBody CreateCustomerRequestDTO request) {
         CreateCustomerResponseDTO response = service.create(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/status/{customerId}")
-    public ResponseEntity<CustomerCheckinStatus> getCustomerStatus(@PathVariable Long customerId) {
-        CustomerCheckinStatus status = service.getCustomerStatus(customerId);
-        return ResponseEntity.ok(status);
-    }
 }
 

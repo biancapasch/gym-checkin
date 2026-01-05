@@ -1,6 +1,8 @@
 package com.biancapasch.poc.gym_checkin.repository;
 
 import com.biancapasch.poc.gym_checkin.domain.entity.CheckinEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +13,6 @@ public interface CheckinRepository extends JpaRepository<CheckinEntity, Long> {
 
     Optional<CheckinEntity> findTopByCustomerIdAndCheckoutTimeIsNullOrderByCheckinTimeDesc(Long topCustomerId);
 
+    Page<CheckinEntity> findAllByCustomerIdOrderByCheckinTimeDesc(Long customerId, Pageable pageable);
 }
 

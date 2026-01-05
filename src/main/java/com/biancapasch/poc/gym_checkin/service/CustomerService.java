@@ -4,6 +4,7 @@ import com.biancapasch.poc.gym_checkin.domain.entity.CheckinEntity;
 import com.biancapasch.poc.gym_checkin.domain.entity.CustomerEntity;
 import com.biancapasch.poc.gym_checkin.dto.CreateCustomerRequestDTO;
 import com.biancapasch.poc.gym_checkin.dto.CreateCustomerResponseDTO;
+import com.biancapasch.poc.gym_checkin.exception.NotFoundException;
 import com.biancapasch.poc.gym_checkin.repository.CheckinRepository;
 import com.biancapasch.poc.gym_checkin.repository.CustomerRepository;
 import jakarta.validation.Valid;
@@ -28,34 +29,6 @@ public class CustomerService {
         customerRepository.save(entity);
 
         return toResponse(entity);
-    }
-
-    public CustomerCheckinStatus getCustomerStatus(Long customerId) {
-        OffsetDateTime now = OffsetDateTime.now();
-
-        CustomerEntity customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        Optional<CheckinEntity> lastOpt =
-                checkinRepository.findTopByCustomerIdAndCheckoutTimeIsNullOrderByCheckinTimeDesc(customer.getId());
-
-        if (lastOpt.isEmpty()) {
-            return CustomerCheckinStatus.OUTSIDE;
-        }
-
-        CheckinEntity last = lastOpt.get();
-        OffsetDateTime checkinTime = last.getCheckinTime();
-        OffsetDateTime limit = now.minusHours(MAX_SESSION_HOURS);
-
-        if (checkinTime == null) {
-            return CustomerCheckinStatus.INCOMPLETE_SESSION;
-        }
-
-        if (checkinTime.isAfter(limit) || checkinTime.isEqual(limit)) {
-            return CustomerCheckinStatus.INSIDE;
-        }
-
-        return CustomerCheckinStatus.INCOMPLETE_SESSION;
     }
 
     private CustomerEntity toEntity(CreateCustomerRequestDTO request) {
