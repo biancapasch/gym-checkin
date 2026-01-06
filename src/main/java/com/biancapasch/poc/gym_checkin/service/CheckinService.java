@@ -61,40 +61,6 @@ public class CheckinService {
                 .map(this::toResponse);
     }
 
-    public SessionCheckinStatus getSessionStatus(Long checkinId) {
-        OffsetDateTime now = OffsetDateTime.now();
-
-        CheckinEntity checkin = checkinRepository.findById(checkinId)
-                .orElseThrow(() -> new NotFoundException("Checkin não encontrado"));
-
-        OffsetDateTime checkinTime = checkin.getCheckinTime();
-        OffsetDateTime checkoutTime = checkin.getCheckoutTime();
-
-        if (checkinTime == null && checkoutTime != null) {
-            return SessionCheckinStatus.INCOMPLETE;
-        }
-
-        if (checkoutTime == null) {
-            if (checkinTime == null) {
-                return SessionCheckinStatus.INCOMPLETE;
-            }
-
-            OffsetDateTime limit = now.minusHours(MAX_SESSION_HOURS);
-            boolean exceededTimeLimit = checkinTime.isBefore(limit);
-
-            return exceededTimeLimit ? SessionCheckinStatus.INCOMPLETE : SessionCheckinStatus.OPEN;
-        }
-
-        if (checkinTime != null) {
-            OffsetDateTime maxAllowedCheckout = checkinTime.plusHours(MAX_SESSION_HOURS);
-            if (checkoutTime.isAfter(maxAllowedCheckout)) {
-                return SessionCheckinStatus.INCOMPLETE;
-            }
-        }
-
-        return SessionCheckinStatus.CLOSED;
-    }
-
     private CreateCheckinResponseDTO handleIn(CustomerEntity customer) {
         OffsetDateTime now = OffsetDateTime.now();
 
