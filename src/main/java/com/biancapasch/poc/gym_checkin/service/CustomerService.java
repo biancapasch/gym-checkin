@@ -1,34 +1,38 @@
 package com.biancapasch.poc.gym_checkin.service;
 
-import com.biancapasch.poc.gym_checkin.domain.entity.CheckinEntity;
 import com.biancapasch.poc.gym_checkin.domain.entity.CustomerEntity;
+import com.biancapasch.poc.gym_checkin.domain.entity.InvoiceEntity;
 import com.biancapasch.poc.gym_checkin.dto.CreateCustomerRequestDTO;
 import com.biancapasch.poc.gym_checkin.dto.CreateCustomerResponseDTO;
 import com.biancapasch.poc.gym_checkin.exception.NotFoundException;
-import com.biancapasch.poc.gym_checkin.repository.CheckinRepository;
 import com.biancapasch.poc.gym_checkin.repository.CustomerRepository;
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final CheckinRepository checkinRepository;
+    private final InvoiceService invoiceService;
 
-    private static final long MAX_SESSION_HOURS = 6L;
-
-    public CreateCustomerResponseDTO create(@Valid CreateCustomerRequestDTO request) {
+    @Transactional
+    public CreateCustomerResponseDTO create(CreateCustomerRequestDTO request, OffsetDateTime expectedPaymentDate) {
         CustomerEntity entity = toEntity(request);
 
-        customerRepository.save(entity);
+        CustomerEntity saved = customerRepository.save(entity);
 
-        return toResponse(entity);
+        InvoiceEntity invoiceEntity = invoiceService.create(saved, null);
+
+        return toResponse(saved);
+    }
+
+    public CustomerEntity findById(Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Customer with id " + id + " not found"));
     }
 
     private CustomerEntity toEntity(CreateCustomerRequestDTO request) {

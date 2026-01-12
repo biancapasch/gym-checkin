@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.OffsetDateTime;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/customers")
@@ -20,8 +22,8 @@ public class CustomerController {
     private final CustomerService service;
 
     @PostMapping
-    public ResponseEntity<CreateCustomerResponseDTO> create(@Valid @RequestBody CreateCustomerRequestDTO request) {
-        CreateCustomerResponseDTO response = service.create(request);
+    public ResponseEntity<CreateCustomerResponseDTO> create(@Valid @RequestBody CreateCustomerRequestDTO request, OffsetDateTime expectedPaymentDate) {
+        CreateCustomerResponseDTO response = service.create(request, expectedPaymentDate);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
