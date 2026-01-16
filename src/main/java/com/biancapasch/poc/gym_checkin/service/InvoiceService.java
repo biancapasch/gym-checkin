@@ -10,11 +10,14 @@ import com.biancapasch.poc.gym_checkin.exception.NotFoundException;
 import com.biancapasch.poc.gym_checkin.repository.InvoiceRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +61,12 @@ public class InvoiceService {
         );
 
         return invoiceRepository.save(invoiceEntity);
+    }
+
+    public Page<InvoicePaymentResponseDTO> getInvoicesByCustomerId(Long customerId, Pageable pageable) {
+        return invoiceRepository
+                .findAllByCustomerId(customerId, pageable)
+                .map(this::toDto);
     }
 
     private InvoicePaymentResponseDTO toDto(InvoiceEntity entity) {

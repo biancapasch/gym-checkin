@@ -3,11 +3,10 @@ package com.biancapasch.poc.gym_checkin.controller;
 import com.biancapasch.poc.gym_checkin.dto.InvoicePaymentResponseDTO;
 import com.biancapasch.poc.gym_checkin.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/customers/{customerId}/invoices")
@@ -21,5 +20,9 @@ public class InvoiceController {
         return ResponseEntity.ok(invoiceService.payPendingInvoice(customerId, invoiceId));
     }
 
+    @GetMapping
+    public ResponseEntity<Page<InvoicePaymentResponseDTO>> getAllInvoicesByCustomerId(@PathVariable Long customerId, Pageable pageable) {
+        return ResponseEntity.ok(invoiceService.getInvoicesByCustomerId(customerId, pageable));
+    }
 
 }
