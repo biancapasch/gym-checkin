@@ -46,4 +46,21 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(status).body(body);
     }
+
+    @ExceptionHandler(DuplicateInvoiceException.class)
+    public ResponseEntity<ApiError> handleDuplicateInvoice(
+            DuplicateInvoiceException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        ApiError body = new ApiError(status.value(),
+                status.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                OffsetDateTime.now()
+        );
+
+        return ResponseEntity.status(status).body(body);
+    }
 }

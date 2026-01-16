@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Service
@@ -20,12 +21,12 @@ public class CustomerService {
     private final InvoiceService invoiceService;
 
     @Transactional
-    public CreateCustomerResponseDTO create(CreateCustomerRequestDTO request, OffsetDateTime expectedPaymentDate) {
+    public CreateCustomerResponseDTO create(CreateCustomerRequestDTO request) {
         CustomerEntity entity = toEntity(request);
 
         CustomerEntity saved = customerRepository.save(entity);
 
-        InvoiceEntity invoiceEntity = invoiceService.create(saved, null);
+        invoiceService.create(saved, request.expectedPaymentDate());
 
         return toResponse(saved);
     }
@@ -36,11 +37,13 @@ public class CustomerService {
     }
 
     private CustomerEntity toEntity(CreateCustomerRequestDTO request) {
+        int dayOfMonth = request.expectedPaymentDate().getDayOfMonth();
         return new CustomerEntity(
                 null,
                 request.firstName(),
                 request.lastName(),
                 request.email(),
+                dayOfMonth,
                 null,
                 null
         );

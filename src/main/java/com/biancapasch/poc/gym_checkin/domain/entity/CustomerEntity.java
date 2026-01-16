@@ -28,6 +28,8 @@ public class CustomerEntity {
 
     private String email;
 
+    private int paymentDay;
+
     @CreationTimestamp
     private OffsetDateTime createdAt;
 

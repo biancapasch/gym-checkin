@@ -4,6 +4,7 @@ import com.biancapasch.poc.gym_checkin.domain.entity.CustomerEntity;
 import com.biancapasch.poc.gym_checkin.domain.entity.InvoiceEntity;
 import com.biancapasch.poc.gym_checkin.domain.entity.InvoiceStatus;
 import com.biancapasch.poc.gym_checkin.dto.InvoicePaymentResponseDTO;
+import com.biancapasch.poc.gym_checkin.exception.DuplicateInvoiceException;
 import com.biancapasch.poc.gym_checkin.exception.InvoiceAlreadyPaidException;
 import com.biancapasch.poc.gym_checkin.exception.NotFoundException;
 import com.biancapasch.poc.gym_checkin.repository.InvoiceRepository;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Service
@@ -40,13 +42,20 @@ public class InvoiceService {
         return toDto(pendingInvoice);
     }
 
-    public InvoiceEntity create(CustomerEntity customerEntity, OffsetDateTime expectedPaymentDate) {
+    @Transactional
+    public InvoiceEntity create(CustomerEntity customerEntity, LocalDate expectedPaymentDate) {
+        if (invoiceRepository.existsByCustomerIdAndExpectedPaymentDate(customerEntity.getId(), expectedPaymentDate)) {
+            throw new DuplicateInvoiceException("Invoice already generated for this date");
+        }
+
         InvoiceEntity invoiceEntity = new InvoiceEntity();
 
         invoiceEntity.setCustomer(customerEntity);
         invoiceEntity.setStatus(InvoiceStatus.PENDING);
         invoiceEntity.setAmount(DEFAULT_MONTHLY_PRICE);
-        invoiceEntity.setExpectedPaymentDate(expectedPaymentDate == null ? OffsetDateTime.now() : expectedPaymentDate);
+        invoiceEntity.setExpectedPaymentDate(
+                expectedPaymentDate == null ? LocalDate.now() : expectedPaymentDate
+        );
 
         return invoiceRepository.save(invoiceEntity);
     }
