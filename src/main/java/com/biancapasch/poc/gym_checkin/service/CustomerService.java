@@ -1,7 +1,6 @@
 package com.biancapasch.poc.gym_checkin.service;
 
 import com.biancapasch.poc.gym_checkin.domain.entity.CustomerEntity;
-import com.biancapasch.poc.gym_checkin.domain.entity.InvoiceEntity;
 import com.biancapasch.poc.gym_checkin.dto.CreateCustomerRequestDTO;
 import com.biancapasch.poc.gym_checkin.dto.CreateCustomerResponseDTO;
 import com.biancapasch.poc.gym_checkin.exception.NotFoundException;
@@ -9,9 +8,6 @@ import com.biancapasch.poc.gym_checkin.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
