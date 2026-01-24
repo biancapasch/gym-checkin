@@ -7,6 +7,7 @@ import com.biancapasch.poc.gym_checkin.dto.CreateCheckinResponseDTO;
 import com.biancapasch.poc.gym_checkin.exception.NotFoundException;
 import com.biancapasch.poc.gym_checkin.repository.CheckinRepository;
 import com.biancapasch.poc.gym_checkin.repository.CustomerRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,16 +22,17 @@ import java.util.Optional;
 public class CheckinService {
 
     private static final long MAX_SESSION_HOURS = 6L;
+    private static final int MAX_PAGE_SIZE = 50;
 
     private final CheckinRepository checkinRepository;
     private final CustomerRepository customerRepository;
 
+    @Transactional
     public CreateCheckinResponseDTO createCheckin(
             Long customerId,
             CreateCheckinRequestDTO request
     ) {
-        CustomerEntity customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
+        CustomerEntity customer = getCustomerOrThrow(customerId);
 
         return switch (request.type()) {
             case IN -> handleIn(customer);
@@ -39,11 +41,12 @@ public class CheckinService {
     }
 
     public Page<CreateCheckinResponseDTO> findAllCheckins(Long customerId, int page, int size) {
-        if (!customerRepository.existsById(customerId)) {
-            throw new NotFoundException("Usuário não encontrado");
-        }
+        getCustomerOrThrow(customerId);
 
-        Pageable pageable = PageRequest.of(page, size);
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+
+        Pageable pageable = PageRequest.of(safePage, safeSize);
 
         Page<CheckinEntity> pageEntities =
                 checkinRepository.findAllByCustomerIdOrderByCheckinTimeDesc(customerId, pageable);
@@ -52,13 +55,16 @@ public class CheckinService {
     }
 
     public Optional<CreateCheckinResponseDTO> findOpenSession(Long customerId) {
-        if (!customerRepository.existsById(customerId)) {
-            throw new NotFoundException("Usuário não encontrado");
-        }
+        getCustomerOrThrow(customerId);
 
         return checkinRepository
                 .findTopByCustomerIdAndCheckoutTimeIsNullOrderByCheckinTimeDesc(customerId)
                 .map(this::toResponse);
+    }
+
+    private CustomerEntity getCustomerOrThrow(Long customerId) {
+        return customerRepository.findById(customerId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     private CreateCheckinResponseDTO handleIn(CustomerEntity customer) {

@@ -24,10 +24,10 @@ public class CheckinController {
             @PathVariable Long customerId,
             @RequestBody @Valid CreateCheckinRequestDTO request
     ) {
-        CreateCheckinResponseDTO checkin =
+        CreateCheckinResponseDTO created =
                 service.createCheckin(customerId, request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(checkin);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
@@ -42,7 +42,7 @@ public class CheckinController {
         return ResponseEntity.ok(dtoPage);
     }
 
-    @GetMapping("/open")
+    @GetMapping("/open-session")
     public ResponseEntity<CreateCheckinResponseDTO> getOpenSession(@PathVariable Long customerId) {
         Optional<CreateCheckinResponseDTO> open = service.findOpenSession(customerId);
 
