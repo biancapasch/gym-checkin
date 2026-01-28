@@ -40,7 +40,6 @@ public class InvoiceService {
 
         pendingInvoice.setStatus(InvoiceStatus.PAID);
         pendingInvoice.setPaidAt(OffsetDateTime.now());
-        invoiceRepository.save(pendingInvoice);
 
         return toDto(pendingInvoice);
     }
