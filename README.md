@@ -1,163 +1,176 @@
-cat > README.md <<'EOF'
 # Gym Check-in API
 
-API REST desenvolvida em Java 21 com Spring Boot para gerenciamento de clientes, check-ins de academia e faturamento mensal.  
-Projeto focado em boas práticas de backend, regras de negócio claras e testes automatizados.
+A REST API built with Java and Spring Boot for managing gym members, check-ins, and monthly billing.
 
-Este projeto foi criado com fins de estudo e portfólio, simulando um sistema real de academia.
+This project simulates a real-world gym management system, focusing on backend best practices, business rule implementation, automated billing workflows, and test coverage.
+
+## Features
+
+### Customer Management
+- Create customers
+- Automatically define payment day based on registration date
+- Manage customer relationships with check-ins and invoices
+
+### Check-in Management
+- Register check-in (IN) and check-out (OUT)
+- Prevent multiple open sessions for the same customer
+- Automatically close inactive sessions after 6 hours
+- Retrieve paginated check-in history
+- Find open sessions by customer
+
+### Invoice Management
+- Generate monthly invoices
+- Prevent duplicate invoice creation for the same billing cycle
+- Mark invoices as paid
+- Retrieve paginated invoices by customer
+
+### Scheduled Jobs
+- Automatic invoice generation
+- Runs twice a day
+- Creates invoices based on each customer's payment day
+- Handles duplicate invoice prevention through exception handling
 
 ---
 
-## Funcionalidades
+## Business Rules
 
-### Clientes
-- Criação de clientes
-- Definição automática do dia de pagamento com base na data informada
-- Relacionamento com check-ins e invoices
+This project implements important real-world business rules:
+
+- A customer can only have one active check-in session at a time
+- Open sessions are automatically closed after 6 hours
+- Invoices cannot be duplicated for the same customer and billing date
+- Paid invoices cannot be paid again
+
+---
+
+## Architecture
+
+This project follows a layered architecture:
+
+```text
+Controller → Service → Repository → Database
+```
+
+### Applied concepts:
+- RESTful API design
+- DTO pattern for requests and responses
+- Service layer business logic
+- JPA / Hibernate persistence
+- Pagination with Pageable
+- Global exception handling
+- Environment profiles (dev/test)
+- Database containerization with Docker
+- Automated testing
+
+---
+
+## Main Endpoints
+
+### Customers
+```http
+POST /customers
+```
 
 ### Check-ins
-- Registro de entrada (IN) e saída (OUT)
-- Controle de sessão aberta
-- Encerramento automático de sessões antigas (limite de 6 horas)
-- Listagem paginada de check-ins
-- Busca de sessão aberta do cliente
-
-### Faturamento (Invoices)
-- Geração de invoices mensais
-- Prevenção de invoices duplicadas para o mesmo cliente e data
-- Pagamento de invoice pendente
-- Listagem paginada de invoices por cliente
-
-### Job agendado
-- Geração automática de invoices
-- Execução duas vezes ao dia
-- Criação de invoices com base no paymentDay dos clientes
-- Tratamento de duplicidade via exceção
-
----
-
-## Arquitetura
-
-O projeto segue uma arquitetura em camadas:
-
-controller -> service -> repository -> database
-
-
-Principais conceitos aplicados:
-- RESTful API
-- DTOs para request e response
-- Regras de negócio concentradas na camada de service
-- JPA / Hibernate
-- Paginação com Pageable
-- Tratamento global de exceções
-- Profiles (dev e test)
-- Docker para banco de dados
-- Testes automatizados
-
----
-
-## Endpoints principais
-
-### Clientes
-
-POST /customers
-
-  ## Check-ins
-
+```http
 POST /customers/{customerId}/checkins
-GET  /customers/{customerId}/checkins
-GET  /customers/{customerId}/checkins/open-session
+GET /customers/{customerId}/checkins
+GET /customers/{customerId}/checkins/open-session
+```
 
-## Invoices
-
+### Invoices
+```http
 PATCH /customers/{customerId}/invoices/{invoiceId}/pay
-GET   /customers/{customerId}/invoices
+GET /customers/{customerId}/invoices
+```
 
-# Tratamento de erros
+---
 
-A API retorna erros padronizados no seguinte formato:
+## Error Handling
 
+Standardized API error response:
+
+```json
 {
-"status": 404,
-"error": "Not Found",
-"message": "Invoice not found",
-"path": "/customers/1/invoices/99/pay",
-"timestamp": "2026-01-28T10:15:30Z"
+  "status": 404,
+  "error": "Not Found",
+  "message": "Invoice not found",
+  "path": "/customers/1/invoices/99/pay",
+  "timestamp": "2026-01-28T10:15:30Z"
 }
+```
 
-## Exceções tratadas:
+Handled exceptions:
+- NotFoundException
+- DuplicateInvoiceException
+- InvoiceAlreadyPaidException
 
-NotFoundException
+---
 
-DuplicateInvoiceException
+## Testing
 
-InvoiceAlreadyPaidException
+Test coverage includes:
 
-## Testes
+- Service layer tests with JUnit 5 and Mockito
+- Repository tests with @DataJpaTest and H2
+- Controller tests with @WebMvcTest and MockMvc
 
-Testes de service com JUnit 5 e Mockito
+---
 
-Testes de repository com @DataJpaTest e H2
-
-Testes de controller com @WebMvcTest e MockMvc
-
-## Tecnologias utilizadas
+## Tech Stack
 
 - Java 21
-
 - Spring Boot 3
-
 - Spring Web
-
 - Spring Data JPA
-
 - Bean Validation
-
 - PostgreSQL
-
-- H2 (testes)
-
+- H2 Database
 - Gradle
-
-- Docker e Docker Compose
-
+- Docker
+- Docker Compose
 - Lombok
+- JUnit 5
+- Mockito
 
-- JUnit 5 e Mockito
+---
 
-- Banco de dados com Docker
+## Running the Database
 
-## Para subir o PostgreSQL localmente:
+Start PostgreSQL locally:
 
+```bash
 docker compose up -d
+```
 
-## Configuração padrão:
+Default configuration:
 
-Database: gym_checkin
+- Database: gym_checkin
+- User: postgres
+- Password: postgres
+- Port: 5432
 
-User: postgres
+---
 
-Password: postgres
+## Running the Application
 
-Port: 5432
+Start the application:
 
-# Como executar o projeto
-
-## Subir o banco de dados
-
-docker compose up -d
-
-## Executar a aplicação
-
+```bash
 ./gradlew bootRun
+```
 
-# Como rodar os testes
+---
 
+## Running Tests
+
+```bash
 ./gradlew test
+```
 
-# Autora
+---
 
-Bianca Paschoal
+## Author
+
+Bianca Paschoal  
 GitHub: https://github.com/biancapasch
-'EOF'
-
